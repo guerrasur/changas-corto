@@ -89,5 +89,20 @@ document.getElementById('applyBalance').addEventListener('click',()=>{balanceDis
 document.getElementById('applyTimer').addEventListener('click',()=>{const m=Math.max(0,Math.min(59,parseInt(document.getElementById('timerInput').value||'0',10))),s=Math.max(0,Math.min(59,parseInt(document.getElementById('secondsInput').value||'0',10)));countdown(m*60+s);sheet.classList.remove('open')});
 document.getElementById('updateAppBtn').addEventListener('click',async()=>{const b=document.getElementById('updateAppBtn');b.disabled=true;b.textContent='Actualizando…';try{if('serviceWorker'in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()))}if('caches'in window){const keys=await caches.keys();await Promise.all(keys.map(k=>caches.delete(k)))}const u=new URL(location.href);u.searchParams.set('_update',Date.now().toString());location.replace(u.toString())}catch(e){b.disabled=false;b.textContent='↻ Reintentar actualización'}});
 sheet.addEventListener('click',e=>{if(e.target===sheet)sheet.classList.remove('open')});
-newJob();if('serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>{})})();
+newJob();
+if('serviceWorker'in navigator){
+  const hadController=!!navigator.serviceWorker.controller;
+  let refreshing=false;
+  if(hadController){
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{
+      if(refreshing)return;
+      refreshing=true;
+      location.reload();
+    });
+  }
+  navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'})
+    .then(reg=>reg.update())
+    .catch(()=>{});
+}
+})();
 </script></body></html>
