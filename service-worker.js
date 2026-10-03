@@ -1,4 +1,4 @@
-const CACHE = 'changas-v32';
+const CACHE = 'changas-v33';
 const ASSETS = [
   './',
   './index.html',
